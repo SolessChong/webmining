@@ -1,0 +1,33 @@
+Method
+======
+tf-idf
+Individual ridge regression
+
+Result
+======
+s1,I can't tell                                    0.112076
+s2,Negative                                        0.303098
+s3,Neutral / author is just sharing information    0.262759
+s4,Positive                                        0.279562
+s5,Tweet not related to weather condition          0.239633
+w1,current (same day) weather                      0.309611
+w2,future (forecast)                               0.200858
+w3,I can't tell                                    0.237919
+w4,past weather                                    0.175650
+k1,clouds                                          0.115953
+k2,cold                                            0.175959
+k3,dry                                             0.063275
+k4,hot                                             0.174860
+k5,humid                                           0.090910
+k6,hurricane                                       0.032465
+k7,I can't tell                                    0.271273
+k8,ice                                             0.039981
+k9,other                                           0.144538
+k10,rain                                           0.162737
+k11,snow                                           0.089346
+k12,storms                                         0.141710
+k13,sun                                            0.164120
+k14,tornado                                        0.120971
+k15,wind                                           0.095510
+
+Public Score: 1.9476, #97

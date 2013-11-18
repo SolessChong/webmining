@@ -41,6 +41,9 @@ label_desc = [
 	"k14,tornado",
 	"k15,wind",
 ]
+label_name = [
+	"s1","s2","s3","s4","s5","w1","w2","w3","w4","k1","k2","k3","k4","k5","k6","k7","k8","k9","k10","k11","k12","k13","k14","k15"
+]
 
 def tokenizer(text):
 	tok = nltk.tokenize.RegexpTokenizer(r'\w{3,}')
@@ -48,18 +51,45 @@ def tokenizer(text):
 	return [w.lower() for w in tok.tokenize(text) if w.lower() not in stopwords]
 
 ###############################################################
-# Routines
-##########
-def read_dataset(input_filename):
+# Routine Utilities
+###################
+def read_labeled_dataset(input_filename):
+    # Read files
+    tweets = read_tweets(input_filename)
+    labels = read_labels(input_filename)        
+
+    # Get feature vectors by tf-idf
+    vec = TfidfVectorizer(tokenizer=tokenizer, max_features=50)
+    data = vec.fit_transform(tweets).toarray()
+
+    return np.array(data), np.array(labels)
+
+def read_all_dataset(train_filename, test_filename = ""):
 	# Read files
-	tweets = read_tweets(input_filename)
-	labels = read_labels(input_filename)	
+	train_tweets = read_tweets(train_filename)
+	labels = read_labels(train_filename)	
 
-	# Get feature vectors by tf-idf
-	vec = TfidfVectorizer(tokenizer=tokenizer, max_features=50)
-	data = vec.fit_transform(tweets).toarray()
+	if test_filename != "":
+		test_tweets = []
+		test_ids = []
+		with open(test_filename, 'r') as csvfile:
+			spamreader = csv.reader(csvfile, delimiter=',')
+			next(spamreader, None) # skip the header
+			for row in spamreader:
+				test_tweets.append(row[1])
+				test_ids.append(row[0])
 
-	return np.array(data), np.array(labels)
+		all_tweets = train_tweets + test_tweets
+		n_train = len(train_tweets)
+		n_test = len(test_tweets)
+
+		# Get feature vectors by tf-idf
+		vec = TfidfVectorizer(tokenizer=tokenizer, max_features=50)
+		all_data = vec.fit_transform(all_tweets).toarray()
+		train_data = all_data[0:n_train]
+		test_data = all_data[n_train:]
+
+		return np.array(train_data), np.array(labels), np.array(test_data), np.array(test_ids)
 
 # Train model
 def train_single_model(train_data, train_labels, algo):
@@ -126,18 +156,25 @@ def evaluate_result(pred, test_labels):
 	nlabels = np.float32(np.array(test_labels))
 
 	error = DataFrame(np.abs(nlabels - npred), columns=label_desc)
-	print error.describe()
+	for i in range
+	print "The global RMSE is ", error.apply(lambda x: np.sqrt(x.dot(x), axis=0)) / np.sqrt(len(error))
 
 	return error
 
-# Main routine
-def routine(algo):
+################################################################
+# Main routines
+###############
+def routine_test(train_filename, algo):
+	"""
+	Used to test the algorithm.
+	Evaluation is printed out in this method
+	"""
 	# Calculate time
 	import time
 	start_time = time.time()
 
 	# Prepare data
-	data, labels = read_dataset('../data/train_1000.csv')
+	data, labels = read_labeled_dataset(train_filename)
 	# Seperate the test and train
 	fold = int(len(data) * 0.9)
 	train_data = data[0:fold]
@@ -152,9 +189,35 @@ def routine(algo):
 	result = get_prediction(fused_model, test_data)
 
 	# Evaluate result
-	error_series = evaluate_result(result, test_labels)
+	error_df = evaluate_result(result, test_labels)
 
 	# Calculate time
 	print 'Execution time: ', time.time() - start_time, 'seconds.'
 
-	return error_series
+	return error_df
+
+def routine_work(train_filename, test_filename, algo):
+# Calculate time
+	import time
+	start_time = time.time()
+
+	# Prepare data
+	data, labels, test_data, test_ids = read_all_dataset(train_filename, 'test_filename')
+	
+	# Train model
+	fused_model = train_model(data, labels)
+
+	# Get predict result
+	result = get_prediction(fused_model, test_data)
+
+	# Write result
+	result_df = DataFrame(result, columns=label_name)
+	result_df.insert(0, 'id', test_ids)
+	result_df.to_csv('../submission/submit.csv', index=False, float_format='%.3f')
+
+	# Calculate time
+	print 'Execution time: ', time.time() - start_time, 'seconds.'
+
+
+if __name__ == 'main':
+	routine_test('../data/train_1000.csv')
