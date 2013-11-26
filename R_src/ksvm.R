@@ -1,7 +1,7 @@
 library(kernlab)
 
 # train the SVM
-svm1 <- ksvm(train,label_senti,type="C-svc",kernel=sk,C=100,scaled=c())
+svm1 <- ksvm(label_mat~.,data=dtm,type="C-svc",kernel=sk,C=100,scaled=c())
 # General summary
 svm1
 # Attributes that you can access
@@ -28,7 +28,6 @@ results <- data.frame(x = label,
                       P.x.1 = probpreds[,2])
  
 ## Further Comparison
-
 predict(svm1, newdata = label, type = "response")
 predict(svm1, newdata = label, type = "decision")
 predict(svm1, newdata = label, type = "votes")

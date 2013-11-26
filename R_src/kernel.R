@@ -8,6 +8,8 @@ library(Snowball)
 rbfkernel <- rbfdot(sigma = 0.1)
 #Create the kernel matrix
 kernmat <- kernelMatrix(kernel=rbfkernel,x=as.matrix(dtm2))
+kernmat2 <- kernelMatrix(kernel=rbfkernel,x=as.matrix(dtm2))
+kernmat3 <- kernelMatrix(kernel=rbfkernel,x=as.matrix(dtm3))
 
 #String Kernel
 sk <- stringdot(type="string",length=3)
