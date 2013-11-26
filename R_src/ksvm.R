@@ -16,6 +16,20 @@ plot(svp,data=train)
 ## get fitted values
 fitted(svm1)
  
-## Test on the training set with probabilities as output
-predict(svm1, label, type="probabilities")
+## Test on the training set with probabilities as svm1put
+probpreds <- predict(svm1, label, type="probabilities")
+## Test on the training set with response as svm1put
+responsepreds <- predict(svm1, label, type = "r")
+
+## Compare
+results <- data.frame(x = label, 
+                      response = responsepreds, 
+                      P.x.0 = probpreds[,1], 
+                      P.x.1 = probpreds[,2])
  
+## Further Comparison
+
+predict(svm1, newdata = label, type = "response")
+predict(svm1, newdata = label, type = "decision")
+predict(svm1, newdata = label, type = "votes")
+predict(svm1, newdata = label, type = "prob")
