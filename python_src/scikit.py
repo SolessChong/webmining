@@ -3,7 +3,6 @@ from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline
 from sklearn.svm import SVR
 from sklearn.linear_model import Ridge
 import numpy as np
@@ -59,10 +58,56 @@ def read_labeled_dataset(input_filename):
     labels = read_labels(input_filename)        
 
     # Get feature vectors by tf-idf
-    vec = TfidfVectorizer(tokenizer=tokenizer, max_features=50)
+    vec = TfidfVectorizer(tokenizer=tokenizer, max_features=100)
     data = vec.fit_transform(tweets).toarray()
 
     return np.array(data), np.array(labels)
+
+def read_labels(input_filename):
+	labels = read_labels(input_filename)
+	return labels
+
+def get_features_from_dataset(input_filename):
+    # Read files
+    tweets = read_tweets(input_filename)
+
+    # Get feature vectors by tf-idf
+    vec = TfidfVectorizer(tokenizer=tokenizer, max_features=100)
+    data = vec.fit_transform(tweets).toarray()
+
+    ### Additional features
+    
+    add_features = []
+    important_words = ['sunny', 'windy', 'humid', 'hot', 'heat', 'cold', 'dry', 'ice', 'icy', 'rain', 'rainy', 'snow', 'tornado']
+
+    """
+    for twtr in tweets:
+    	# Important words
+    	important_words_ftr = [int(word in twtr) for word in important_words]
+    	# Tense
+    	tagz = zip(*nltk.pos_tag(nltk.word_tokenize(twtr)))[1]
+    	past_num = len([v for v in tagz if v == 'VBD'])
+    	present_num = len([v for v in tagz if v in ['VBP', 'VB']])
+    	
+    	add_features.append(important_words_ftr + [past_num, present_num])
+
+    data_extended = np.hstack((data, add_features))	
+    column_names = vec.get_feature_names() + ['add_words:' + word for word in important_words] + ['past_tense_num', 'present_tense_num']
+    features = DataFrame(data_extended, columns = column_names)
+    """
+    for twtr in tweets:
+    	# Important words
+    	important_words_ftr = [int(word in twtr) for word in important_words]
+    	
+    	add_features.append(important_words_ftr)
+
+    add_features = np.array(add_features)
+
+    data_extended = np.hstack((data, add_features))
+    column_names = vec.get_feature_names() + ['add_words:' + word for word in important_words]
+    features = DataFrame(data_extended, columns = column_names)
+    
+    return features
 
 def read_all_dataset(train_filename, test_filename = ""):
 	# Read files
@@ -84,7 +129,7 @@ def read_all_dataset(train_filename, test_filename = ""):
 		n_test = len(test_tweets)
 
 		# Get feature vectors by tf-idf
-		vec = TfidfVectorizer(tokenizer=tokenizer, max_features=50)
+		vec = TfidfVectorizer(tokenizer=tokenizer, max_features=200)
 		all_data = vec.fit_transform(all_tweets).toarray()
 		train_data = all_data[0:n_train]
 		test_data = all_data[n_train:]
@@ -156,8 +201,8 @@ def evaluate_result(pred, test_labels):
 	nlabels = np.float32(np.array(test_labels))
 
 	error = DataFrame(np.abs(nlabels - npred), columns=label_desc)
-	for i in range
-	print "The global RMSE is ", error.apply(lambda x: np.sqrt(x.dot(x), axis=0)) / np.sqrt(len(error))
+	#for i in range
+	print "The global RMSE is ", error.apply(lambda x: np.sqrt(x.dot(x)), axis=0) / np.sqrt(len(error))
 
 	return error
 
@@ -202,7 +247,7 @@ def routine_work(train_filename, test_filename, algo):
 	start_time = time.time()
 
 	# Prepare data
-	data, labels, test_data, test_ids = read_all_dataset(train_filename, 'test_filename')
+	data, labels, test_data, test_ids = read_all_dataset(train_filename, test_filename)
 	
 	# Train model
 	fused_model = train_model(data, labels)
