@@ -9,7 +9,7 @@ We use NLTK, scikit
 
 Methods
 =======
-We used some basic routines on this project. 
+We used some basic routines in this project. 
 
 Preprocess
 ----------
